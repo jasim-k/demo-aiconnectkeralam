@@ -1,5 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
-import { BookOpen, Folder, Menu, Search, Store } from 'lucide-react';
+import { Folder, Menu, Search, Store } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import AppLogoIcon from '@/components/app-logo-icon';
 import { Breadcrumbs } from '@/components/breadcrumbs';
@@ -52,11 +52,6 @@ const rightNavItems: NavItem[] = [
         title: 'AI Connect Kerala',
         href: 'https://demo.aiconnectkeralam.in',
         icon: Folder,
-    },
-    {
-        title: 'Documentation',
-        href: 'https://laravel.com/docs/starter-kits#react',
-        icon: BookOpen,
     },
 ];
 
