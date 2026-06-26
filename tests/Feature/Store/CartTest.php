@@ -2,6 +2,8 @@
 
 use App\Models\CartItem;
 use App\Models\Product;
+use App\Models\User;
+use App\Services\CartService;
 
 beforeEach(fn () => pinGuestSession());
 
@@ -85,5 +87,36 @@ it('shares the cart summary on every page', function () {
         ->assertInertia(fn ($page) => $page
             ->where('cart.count', 2)
             ->where('cart.total', 2000)
+        );
+});
+
+it('keys a logged-in customer cart the same way the Telegram assistant and MCP do', function () {
+    $user = User::factory()->create();
+    $product = Product::factory()->create(['stock' => 10]);
+
+    $this->actingAs($user)
+        ->post('/cart/add', ['product_id' => $product->id, 'quantity' => 2])
+        ->assertRedirect();
+
+    $this->assertDatabaseHas('carts', [
+        'session_id' => config('store.mcp_cart_session').'-user-'.$user->id,
+    ]);
+    expect(CartItem::where('product_id', $product->id)->sum('quantity'))->toBe(2);
+});
+
+it('shows items added via Telegram or MCP in the same customer web cart', function () {
+    $user = User::factory()->create();
+    $product = Product::factory()->create(['stock' => 10, 'name' => 'Telegram Phone']);
+
+    // Simulate an add performed by the assistant / MCP (user-namespaced session).
+    $carts = app(CartService::class);
+    $carts->add($carts->forSession($carts->sessionKeyFor($user, 'unused')), $product, 1);
+
+    $this->actingAs($user)
+        ->get('/cart')
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->where('cart.count', 1)
+            ->where('cart.items.0.name', 'Telegram Phone')
         );
 });

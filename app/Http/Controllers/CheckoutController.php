@@ -21,7 +21,7 @@ class CheckoutController extends Controller
 
     public function index(Request $request): Response|RedirectResponse
     {
-        $cart = $this->cart->forSession($request->session()->getId());
+        $cart = $this->cart->forSession($this->cart->sessionKeyFor($request->user(), $request->session()->getId()));
 
         if ($cart->load('items')->isEmpty()) {
             return to_route('cart.index');
@@ -40,7 +40,7 @@ class CheckoutController extends Controller
 
     public function store(CheckoutRequest $request): RedirectResponse
     {
-        $cart = $this->cart->forSession($request->session()->getId());
+        $cart = $this->cart->forSession($this->cart->sessionKeyFor($request->user(), $request->session()->getId()));
 
         $order = $this->checkout->place($cart, $request->customerDetails(), $request->user()->id);
 

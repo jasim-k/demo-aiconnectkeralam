@@ -17,7 +17,7 @@ class CartController extends Controller
 
     public function index(Request $request): Response
     {
-        $cart = $this->cart->forSession($request->session()->getId());
+        $cart = $this->cart->forSession($this->cart->sessionKeyFor($request->user(), $request->session()->getId()));
 
         return Inertia::render('store/cart', [
             'cart' => $this->cart->present($cart),
@@ -26,7 +26,7 @@ class CartController extends Controller
 
     public function add(AddToCartRequest $request): RedirectResponse
     {
-        $cart = $this->cart->forSession($request->session()->getId());
+        $cart = $this->cart->forSession($this->cart->sessionKeyFor($request->user(), $request->session()->getId()));
         $product = Product::findOrFail($request->integer('product_id'));
 
         $this->cart->add($cart, $product, $request->integer('quantity') ?: 1);
@@ -38,7 +38,7 @@ class CartController extends Controller
 
     public function update(UpdateCartRequest $request): RedirectResponse
     {
-        $cart = $this->cart->forSession($request->session()->getId());
+        $cart = $this->cart->forSession($this->cart->sessionKeyFor($request->user(), $request->session()->getId()));
         $product = Product::findOrFail($request->integer('product_id'));
 
         $this->cart->updateQuantity($cart, $product, $request->integer('quantity'));
@@ -52,7 +52,7 @@ class CartController extends Controller
             'product_id' => ['required', 'integer', 'exists:products,id'],
         ]);
 
-        $cart = $this->cart->forSession($request->session()->getId());
+        $cart = $this->cart->forSession($this->cart->sessionKeyFor($request->user(), $request->session()->getId()));
         $this->cart->remove($cart, Product::findOrFail((int) $validated['product_id']));
 
         Inertia::flash('toast', ['type' => 'success', 'message' => 'Item removed from cart.']);
@@ -62,7 +62,7 @@ class CartController extends Controller
 
     public function clear(Request $request): RedirectResponse
     {
-        $cart = $this->cart->forSession($request->session()->getId());
+        $cart = $this->cart->forSession($this->cart->sessionKeyFor($request->user(), $request->session()->getId()));
         $this->cart->clear($cart);
 
         Inertia::flash('toast', ['type' => 'success', 'message' => 'Cart cleared.']);
