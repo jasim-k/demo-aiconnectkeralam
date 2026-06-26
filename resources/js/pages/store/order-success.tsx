@@ -2,6 +2,7 @@ import { Head, Link } from '@inertiajs/react';
 import { CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { formatPrice } from '@/lib/utils';
+import { track as trackOrder } from '@/routes/orders';
 import { index as productsIndex } from '@/routes/products';
 import type { Order } from '@/types/store';
 
@@ -58,9 +59,12 @@ export default function OrderSuccess({ order }: { order: Order }) {
                     <p className="text-muted-foreground">{order.phone}</p>
                 </div>
 
-                <div className="mt-8 text-center">
+                <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
                     <Button asChild size="lg" className="rounded-full px-8">
                         <Link href={productsIndex()}>Continue shopping</Link>
+                    </Button>
+                    <Button asChild size="lg" variant="outline" className="rounded-full px-8">
+                        <Link href={trackOrder()}>Track your order</Link>
                     </Button>
                 </div>
             </div>

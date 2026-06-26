@@ -11,6 +11,7 @@ import { useInitials } from '@/hooks/use-initials';
 import { cn } from '@/lib/utils';
 import { home, login } from '@/routes';
 import { index as cartIndex } from '@/routes/cart';
+import { track as trackOrder } from '@/routes/orders';
 import { index as productsIndex } from '@/routes/products';
 
 function CartButton() {
@@ -140,10 +141,35 @@ function StoreHeader() {
 }
 
 function StoreFooter() {
+    const series = (s: string) => productsIndex({ query: { series: s } }).url;
     const links = [
-        { heading: 'Shop', items: ['iPhone 17', 'iPhone 16', 'iPhone 15', 'Accessories'] },
-        { heading: 'Help', items: ['Shipping & Delivery', 'Returns', 'Order Status', 'Contact Us'] },
-        { heading: 'About', items: ['AI Connect Kerala', 'Our Story', 'Careers', 'Newsroom'] },
+        {
+            heading: 'Shop',
+            items: [
+                { label: 'iPhone 17', href: series('iPhone 17') },
+                { label: 'iPhone 16', href: series('iPhone 16') },
+                { label: 'iPhone 15', href: series('iPhone 15') },
+                { label: 'Accessories', href: series('Accessories') },
+            ],
+        },
+        {
+            heading: 'Help',
+            items: [
+                { label: 'Track order', href: trackOrder().url },
+                { label: 'Shipping & Delivery', href: productsIndex().url },
+                { label: 'Returns', href: productsIndex().url },
+                { label: 'Contact Us', href: productsIndex().url },
+            ],
+        },
+        {
+            heading: 'About',
+            items: [
+                { label: 'AI Connect Kerala', href: home().url },
+                { label: 'Our Story', href: home().url },
+                { label: 'Careers', href: home().url },
+                { label: 'Newsroom', href: home().url },
+            ],
+        },
     ];
 
     return (
@@ -161,12 +187,12 @@ function StoreFooter() {
                             <h3 className="text-sm font-semibold">{group.heading}</h3>
                             <ul className="mt-4 space-y-2.5">
                                 {group.items.map((item) => (
-                                    <li key={item}>
+                                    <li key={item.label}>
                                         <Link
-                                            href={productsIndex()}
+                                            href={item.href}
                                             className="text-sm text-muted-foreground transition-colors hover:text-foreground"
                                         >
-                                            {item}
+                                            {item.label}
                                         </Link>
                                     </li>
                                 ))}
