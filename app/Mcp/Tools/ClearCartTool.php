@@ -20,7 +20,7 @@ class ClearCartTool extends Tool
 
     public function handle(Request $request, CartService $carts): Response
     {
-        $carts->clear($this->resolveCart($carts));
+        $carts->clear($this->resolveCart($request, $carts));
 
         return Response::text('The cart has been cleared. It is now empty.');
     }

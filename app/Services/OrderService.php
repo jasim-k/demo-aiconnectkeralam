@@ -13,9 +13,10 @@ class OrderService
      *
      * @param  array{customer_name: string, email: string, phone: string, address: string}  $customer
      */
-    public function createFromCart(Cart $cart, array $customer): Order
+    public function createFromCart(Cart $cart, array $customer, ?int $userId = null): Order
     {
         $order = Order::create([
+            'user_id' => $userId,
             'order_number' => $this->generateOrderNumber(),
             'customer_name' => $customer['customer_name'],
             'email' => $customer['email'],

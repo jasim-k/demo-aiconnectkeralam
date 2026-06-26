@@ -27,10 +27,10 @@ class RemoveFromCartTool extends Tool
 
         $product = Product::findOrFail((int) $validated['product_id']);
 
-        $carts->remove($this->resolveCart($carts), $product);
+        $carts->remove($this->resolveCart($request, $carts), $product);
 
         return Response::text(
-            "Removed {$product->name} from the cart.\n\n".$this->cartSummary($carts)
+            "Removed {$product->name} from the cart.\n\n".$this->cartSummary($request, $carts)
         );
     }
 

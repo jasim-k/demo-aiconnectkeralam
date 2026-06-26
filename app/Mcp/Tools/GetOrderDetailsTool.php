@@ -2,7 +2,7 @@
 
 namespace App\Mcp\Tools;
 
-use App\Models\Order;
+use App\Mcp\Tools\Concerns\InteractsWithCustomerOrders;
 use App\Support\Money;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\JsonSchema\Types\Type;
@@ -16,13 +16,15 @@ use Laravel\Mcp\Server\Tool;
 #[Description('Look up a placed order by its order number and return the customer, items and total.')]
 class GetOrderDetailsTool extends Tool
 {
+    use InteractsWithCustomerOrders;
+
     public function handle(Request $request): Response
     {
         $validated = $request->validate([
             'order_number' => ['required', 'string'],
         ]);
 
-        $order = Order::with('items')->where('order_number', $validated['order_number'])->first();
+        $order = $this->findOrderForRequest($request, $validated['order_number']);
 
         if ($order === null) {
             return Response::error("No order found with number \"{$validated['order_number']}\".");

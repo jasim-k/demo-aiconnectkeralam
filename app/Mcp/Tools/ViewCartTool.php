@@ -20,7 +20,7 @@ class ViewCartTool extends Tool
 
     public function handle(Request $request, CartService $carts): Response
     {
-        return Response::text($this->cartSummary($carts));
+        return Response::text($this->cartSummary($request, $carts));
     }
 
     /**

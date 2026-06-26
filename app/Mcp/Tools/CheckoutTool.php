@@ -30,7 +30,7 @@ class CheckoutTool extends Tool
             'address' => ['required', 'string', 'max:1000'],
         ]);
 
-        $cart = $this->resolveCart($carts);
+        $cart = $this->resolveCart($request, $carts);
 
         try {
             $order = $checkout->place($cart, [
@@ -38,7 +38,7 @@ class CheckoutTool extends Tool
                 'email' => (string) $validated['email'],
                 'phone' => (string) $validated['phone'],
                 'address' => (string) $validated['address'],
-            ]);
+            ], $request->user()?->getAuthIdentifier());
         } catch (ValidationException $e) {
             return Response::error(implode(' ', $e->validator->errors()->all()));
         }

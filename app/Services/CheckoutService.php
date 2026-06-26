@@ -21,16 +21,16 @@ class CheckoutService
      *
      * @throws ValidationException
      */
-    public function place(Cart $cart, array $customer): Order
+    public function place(Cart $cart, array $customer, ?int $userId = null): Order
     {
         $cart->load('items.product');
 
         $this->validateCart($cart);
 
-        return DB::transaction(function () use ($cart, $customer): Order {
+        return DB::transaction(function () use ($cart, $customer, $userId): Order {
             $this->validateAndDeductStock($cart);
 
-            $order = $this->orderService->createFromCart($cart, $customer);
+            $order = $this->orderService->createFromCart($cart, $customer, $userId);
 
             $this->cartService->clear($cart);
 

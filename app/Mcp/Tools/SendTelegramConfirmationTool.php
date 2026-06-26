@@ -2,6 +2,7 @@
 
 namespace App\Mcp\Tools;
 
+use App\Mcp\Tools\Concerns\InteractsWithCustomerOrders;
 use App\Models\Order;
 use App\Support\Money;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
@@ -18,6 +19,8 @@ use Laravel\Mcp\Server\Tool;
 #[Description('Send an order confirmation message to Telegram for a given order number. Requires a configured Telegram bot token and chat id.')]
 class SendTelegramConfirmationTool extends Tool
 {
+    use InteractsWithCustomerOrders;
+
     public function handle(Request $request): Response
     {
         $validated = $request->validate([
@@ -25,7 +28,7 @@ class SendTelegramConfirmationTool extends Tool
             'chat_id' => ['nullable', 'string'],
         ]);
 
-        $order = Order::with('items')->where('order_number', $validated['order_number'])->first();
+        $order = $this->findOrderForRequest($request, $validated['order_number']);
 
         if ($order === null) {
             return Response::error("No order found with number \"{$validated['order_number']}\".");

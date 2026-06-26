@@ -40,7 +40,7 @@ class CheckoutController extends Controller
     {
         $cart = $this->cart->forSession($request->session()->getId());
 
-        $order = $this->checkout->place($cart, $request->customerDetails());
+        $order = $this->checkout->place($cart, $request->customerDetails(), $request->user()->id);
 
         $request->session()->push('order_numbers', $order->order_number);
 

@@ -30,13 +30,13 @@ class UpdateCartQuantityTool extends Tool
         $product = Product::findOrFail((int) $validated['product_id']);
 
         try {
-            $carts->updateQuantity($this->resolveCart($carts), $product, $validated['quantity']);
+            $carts->updateQuantity($this->resolveCart($request, $carts), $product, $validated['quantity']);
         } catch (ValidationException $e) {
             return Response::error(implode(' ', $e->validator->errors()->all()));
         }
 
         return Response::text(
-            "Updated {$product->name} to quantity {$validated['quantity']}.\n\n".$this->cartSummary($carts)
+            "Updated {$product->name} to quantity {$validated['quantity']}.\n\n".$this->cartSummary($request, $carts)
         );
     }
 

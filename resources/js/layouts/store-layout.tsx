@@ -11,7 +11,7 @@ import { useInitials } from '@/hooks/use-initials';
 import { cn } from '@/lib/utils';
 import { home, login } from '@/routes';
 import { index as cartIndex } from '@/routes/cart';
-import { track as trackOrder } from '@/routes/orders';
+import { index as ordersIndex, track as trackOrder } from '@/routes/orders';
 import { index as productsIndex } from '@/routes/products';
 
 function CartButton() {
@@ -153,21 +153,11 @@ function StoreFooter() {
             ],
         },
         {
-            heading: 'Help',
+            heading: 'Account',
             items: [
+                { label: 'My orders', href: ordersIndex().url },
                 { label: 'Track order', href: trackOrder().url },
-                { label: 'Shipping & Delivery', href: productsIndex().url },
-                { label: 'Returns', href: productsIndex().url },
-                { label: 'Contact Us', href: productsIndex().url },
-            ],
-        },
-        {
-            heading: 'About',
-            items: [
-                { label: 'AI Connect Kerala', href: home().url },
-                { label: 'Our Story', href: home().url },
-                { label: 'Careers', href: home().url },
-                { label: 'Newsroom', href: home().url },
+                { label: 'Browse store', href: productsIndex().url },
             ],
         },
     ];
@@ -175,22 +165,26 @@ function StoreFooter() {
     return (
         <footer className="mt-24 border-t border-border/60 bg-muted/30">
             <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
-                <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
-                    <div>
-                        <img src="/brand/ai-con-logo.svg" alt="AI Connect Kerala" className="h-7 w-auto" />
-                        <p className="mt-3 max-w-xs text-sm text-muted-foreground">
-                            A demo storefront for AI Connect Kerala — Laravel, Inertia & MCP.
+                <div className="grid gap-10 md:grid-cols-[1.5fr_1fr_1fr]">
+                    <div className="max-w-sm">
+                        <Link href={home()} aria-label="AI Connect Kerala — home">
+                            <img src="/brand/ai-con-logo.svg" alt="AI Connect Kerala" className="h-7 w-auto" />
+                        </Link>
+                        <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
+                            A demo storefront for AI Connect Kerala, built with Laravel, Inertia & MCP.
                         </p>
                     </div>
                     {links.map((group) => (
                         <div key={group.heading}>
-                            <h3 className="text-sm font-semibold">{group.heading}</h3>
-                            <ul className="mt-4 space-y-2.5">
+                            <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                                {group.heading}
+                            </h3>
+                            <ul className="mt-4 space-y-3">
                                 {group.items.map((item) => (
                                     <li key={item.label}>
                                         <Link
                                             href={item.href}
-                                            className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+                                            className="text-sm text-foreground/80 transition-colors hover:text-foreground"
                                         >
                                             {item.label}
                                         </Link>

@@ -30,13 +30,13 @@ class AddToCartTool extends Tool
         $product = Product::findOrFail((int) $validated['product_id']);
 
         try {
-            $carts->add($this->resolveCart($carts), $product, $validated['quantity'] ?? 1);
+            $carts->add($this->resolveCart($request, $carts), $product, $validated['quantity'] ?? 1);
         } catch (ValidationException $e) {
             return Response::error(implode(' ', $e->validator->errors()->all()));
         }
 
         return Response::text(
-            "Added {$product->name} to the cart.\n\n".$this->cartSummary($carts)
+            "Added {$product->name} to the cart.\n\n".$this->cartSummary($request, $carts)
         );
     }
 
