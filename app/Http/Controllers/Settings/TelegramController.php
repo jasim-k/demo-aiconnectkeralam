@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Settings;
 
 use App\Http\Controllers\Controller;
 use App\Services\Telegram\TelegramPairingService;
+use App\Support\QrCode;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -19,17 +20,37 @@ class TelegramController extends Controller
     public function edit(Request $request): Response
     {
         $user = $request->user();
+        $pairCode = $user->hasConnectedTelegram() ? null : $user->telegram_pair_code;
+        $deepLink = $this->pairDeepLink($pairCode);
 
         return Inertia::render('settings/telegram', [
             'telegram' => [
                 'connected' => $user->hasConnectedTelegram(),
                 'username' => $user->telegram_username,
                 'connected_at' => $user->telegram_connected_at?->toIso8601String(),
-                'pair_code' => $user->hasConnectedTelegram() ? null : $user->telegram_pair_code,
+                'pair_code' => $pairCode,
                 'pair_code_expires_at' => $user->telegram_pair_code_expires_at?->toIso8601String(),
+                'pair_deep_link' => $deepLink,
+                'pair_qr_svg' => $deepLink !== null ? QrCode::svgDataUri($deepLink) : null,
             ],
             'botUsername' => config('services.telegram.bot_username'),
         ]);
+    }
+
+    /**
+     * Build the t.me deep link that opens the bot and sends /start <code>.
+     *
+     * Returns null when there is no active code or the bot username is unset.
+     */
+    private function pairDeepLink(?string $pairCode): ?string
+    {
+        $botHandle = ltrim((string) config('services.telegram.bot_username'), '@');
+
+        if ($pairCode === null || $botHandle === '') {
+            return null;
+        }
+
+        return "https://t.me/{$botHandle}?start={$pairCode}";
     }
 
     /**

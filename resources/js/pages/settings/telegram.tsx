@@ -11,6 +11,8 @@ type TelegramStatus = {
     connected_at: string | null;
     pair_code: string | null;
     pair_code_expires_at: string | null;
+    pair_deep_link: string | null;
+    pair_qr_svg: string | null;
 };
 
 type PageProps = {
@@ -111,23 +113,52 @@ export default function Telegram() {
                                     </li>
                                 </ol>
 
-                                <div className="rounded-md border border-dashed p-4">
-                                    <p className="text-xs tracking-wide text-muted-foreground uppercase">
-                                        Your pairing code
-                                    </p>
-                                    <p className="mt-1 font-mono text-2xl font-semibold">
-                                        {telegram.pair_code}
-                                    </p>
-                                    {telegram.pair_code_expires_at && (
-                                        <p className="mt-1 text-xs text-muted-foreground">
-                                            Expires{' '}
-                                            {formatDate(
-                                                telegram.pair_code_expires_at,
-                                            )}
-                                            .
+                                <div className="flex flex-col gap-4 sm:flex-row sm:items-stretch">
+                                    <div className="flex-1 rounded-md border border-dashed p-4">
+                                        <p className="text-xs tracking-wide text-muted-foreground uppercase">
+                                            Your pairing code
                                         </p>
+                                        <p className="mt-1 font-mono text-2xl font-semibold">
+                                            {telegram.pair_code}
+                                        </p>
+                                        {telegram.pair_code_expires_at && (
+                                            <p className="mt-1 text-xs text-muted-foreground">
+                                                Expires{' '}
+                                                {formatDate(
+                                                    telegram.pair_code_expires_at,
+                                                )}
+                                                .
+                                            </p>
+                                        )}
+                                    </div>
+
+                                    {telegram.pair_qr_svg && (
+                                        <div className="flex flex-col items-center justify-center gap-2 rounded-md border border-dashed p-4">
+                                            <img
+                                                src={telegram.pair_qr_svg}
+                                                alt="Scan to connect Telegram"
+                                                className="size-36 rounded bg-white p-2"
+                                                data-test="telegram-pair-qr"
+                                            />
+                                            <p className="text-xs text-muted-foreground">
+                                                Scan to open the bot and connect
+                                            </p>
+                                        </div>
                                     )}
                                 </div>
+
+                                {telegram.pair_deep_link && (
+                                    <Button asChild variant="outline">
+                                        <a
+                                            href={telegram.pair_deep_link}
+                                            target="_blank"
+                                            rel="noreferrer"
+                                            data-test="telegram-open-deep-link"
+                                        >
+                                            Open in Telegram
+                                        </a>
+                                    </Button>
+                                )}
 
                                 <Form
                                     {...TelegramController.store.form()}
