@@ -77,9 +77,9 @@ it('rejects updates with a missing or wrong secret token when one is configured'
     ])->assertOk();
 });
 
-it('ignores non-command messages', function () {
+it('prompts unpaired chats to connect when they send a non-command message', function () {
     $this->postJson(route('telegram.webhook'), telegramUpdate('hello there'))
         ->assertOk();
 
-    Http::assertNothingSent();
+    Http::assertSent(fn ($request): bool => str_contains($request['text'], '/pair YOURCODE'));
 });
