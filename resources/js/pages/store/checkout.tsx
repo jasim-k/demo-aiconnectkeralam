@@ -13,7 +13,7 @@ import type { Cart } from '@/types/store';
 
 type CheckoutProps = {
     cart: Cart;
-    customer: { name: string; email: string };
+    customer: { name: string; email: string; phone: string | null; address: string | null };
 };
 
 export default function Checkout({ cart, customer }: CheckoutProps) {
@@ -50,7 +50,7 @@ export default function Checkout({ cart, customer }: CheckoutProps) {
                                             </div>
                                             <div className="grid gap-2">
                                                 <Label htmlFor="phone">Phone</Label>
-                                                <Input id="phone" name="phone" type="tel" required autoComplete="tel" />
+                                                <Input id="phone" name="phone" type="tel" defaultValue={customer.phone ?? ''} required autoComplete="tel" />
                                                 <InputError message={errors.phone} />
                                             </div>
                                         </div>
@@ -59,6 +59,7 @@ export default function Checkout({ cart, customer }: CheckoutProps) {
                                             <textarea
                                                 id="address"
                                                 name="address"
+                                                defaultValue={customer.address ?? ''}
                                                 required
                                                 rows={3}
                                                 className="flex w-full rounded-xl border border-input bg-transparent px-3 py-2 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"

@@ -32,6 +32,8 @@ class CheckoutController extends Controller
             'customer' => [
                 'name' => $request->user()->name,
                 'email' => $request->user()->email,
+                'phone' => $request->user()->phone,
+                'address' => $request->user()->address,
             ],
         ]);
     }

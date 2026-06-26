@@ -16,7 +16,7 @@ use Laravel\Mcp\Server\Attributes\Name;
 use Laravel\Mcp\Server\Tool;
 
 #[Name('checkout')]
-#[Description('Place the order for the current cart. Validates the cart and stock, creates the order, deducts stock and clears the cart. Requires the customer name, email, phone and shipping address.')]
+#[Description('Place the order for the current cart. Validates the cart and stock, creates the order, deducts stock and clears the cart. The customer name, email, phone and shipping address are required; any omitted field falls back to the signed-in customer\'s saved profile.')]
 class CheckoutTool extends Tool
 {
     use FormatsOrders;
@@ -25,21 +25,36 @@ class CheckoutTool extends Tool
     public function handle(Request $request, CheckoutService $checkout, CartService $carts): Response
     {
         $validated = $request->validate([
-            'customer_name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', 'max:255'],
-            'phone' => ['required', 'string', 'max:30'],
-            'address' => ['required', 'string', 'max:1000'],
+            'customer_name' => ['nullable', 'string', 'max:255'],
+            'email' => ['nullable', 'email', 'max:255'],
+            'phone' => ['nullable', 'string', 'max:30'],
+            'address' => ['nullable', 'string', 'max:1000'],
         ]);
+
+        $user = $request->user();
+
+        $customer = [
+            'customer_name' => $validated['customer_name'] ?? $user?->name,
+            'email' => $validated['email'] ?? $user?->email,
+            'phone' => $validated['phone'] ?? $user?->phone,
+            'address' => $validated['address'] ?? $user?->address,
+        ];
+
+        $missing = array_keys(array_filter($customer, fn ($value): bool => blank($value)));
+
+        if ($missing !== []) {
+            return Response::error('Missing customer details: '.implode(', ', $missing).'. Provide them or save them in profile settings.');
+        }
 
         $cart = $this->resolveCart($request, $carts);
 
         try {
             $order = $checkout->place($cart, [
-                'customer_name' => (string) $validated['customer_name'],
-                'email' => (string) $validated['email'],
-                'phone' => (string) $validated['phone'],
-                'address' => (string) $validated['address'],
-            ], $request->user()?->getAuthIdentifier());
+                'customer_name' => (string) $customer['customer_name'],
+                'email' => (string) $customer['email'],
+                'phone' => (string) $customer['phone'],
+                'address' => (string) $customer['address'],
+            ], $user?->getAuthIdentifier());
         } catch (ValidationException $e) {
             return Response::error(implode(' ', $e->validator->errors()->all()));
         }
@@ -57,10 +72,10 @@ class CheckoutTool extends Tool
     public function schema(JsonSchema $schema): array
     {
         return [
-            'customer_name' => $schema->string()->description('Full name of the customer.')->required(),
-            'email' => $schema->string()->description('Customer email address.')->required(),
-            'phone' => $schema->string()->description('Customer phone number.')->required(),
-            'address' => $schema->string()->description('Full shipping address.')->required(),
+            'customer_name' => $schema->string()->description('Full name of the customer. Falls back to the signed-in customer\'s saved profile when omitted.'),
+            'email' => $schema->string()->description('Customer email address. Falls back to the saved profile when omitted.'),
+            'phone' => $schema->string()->description('Customer phone number. Falls back to the saved profile when omitted.'),
+            'address' => $schema->string()->description('Full shipping address. Falls back to the saved profile when omitted.'),
         ];
     }
 }

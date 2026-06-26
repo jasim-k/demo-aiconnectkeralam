@@ -18,7 +18,29 @@ trait ProfileValidationRules
         return [
             'name' => $this->nameRules(),
             'email' => $this->emailRules($userId),
+            'phone' => $this->phoneRules(),
+            'address' => $this->addressRules(),
         ];
+    }
+
+    /**
+     * Get the validation rules used to validate user phone numbers.
+     *
+     * @return array<int, ValidationRule|array<mixed>|string>
+     */
+    protected function phoneRules(): array
+    {
+        return ['nullable', 'string', 'max:30'];
+    }
+
+    /**
+     * Get the validation rules used to validate user shipping addresses.
+     *
+     * @return array<int, ValidationRule|array<mixed>|string>
+     */
+    protected function addressRules(): array
+    {
+        return ['nullable', 'string', 'max:1000'];
     }
 
     /**
