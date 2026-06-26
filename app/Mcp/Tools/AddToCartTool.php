@@ -35,9 +35,14 @@ class AddToCartTool extends Tool
             return Response::error(implode(' ', $e->validator->errors()->all()));
         }
 
-        return Response::text(
-            "Added {$product->name} to the cart.\n\n".$this->cartSummary($request, $carts)
-        );
+        return Response::json([
+            'added' => [
+                'product_id' => $product->id,
+                'name' => $product->name,
+                'quantity' => $validated['quantity'] ?? 1,
+            ],
+            'cart' => $this->cartArray($request, $carts),
+        ]);
     }
 
     /**

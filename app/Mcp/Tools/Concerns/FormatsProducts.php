@@ -4,21 +4,28 @@ namespace App\Mcp\Tools\Concerns;
 
 use App\Models\Product;
 use App\Support\Money;
-use Illuminate\Support\Collection;
 
 trait FormatsProducts
 {
     /**
-     * A one-line summary of a product for list output.
+     * A machine-readable representation of a product for JSON tool output.
+     *
+     * @return array<string, mixed>
      */
-    protected function productLine(Product $product): string
+    protected function productArray(Product $product): array
     {
-        $attributes = Collection::make([$product->color, $product->storage])->filter()->implode(', ');
-        $stock = $product->stock > 0 ? "{$product->stock} in stock" : 'Sold out';
-
-        return "[#{$product->id}] {$product->name}"
-            .($attributes !== '' ? " — {$attributes}" : '')
-            .' · '.Money::inr($product->price)
-            ." · {$stock}";
+        return [
+            'id' => $product->id,
+            'name' => $product->name,
+            'series' => $product->series,
+            'model' => $product->model,
+            'color' => $product->color,
+            'storage' => $product->storage,
+            'sku' => $product->sku,
+            'price' => $product->price,
+            'price_formatted' => Money::inr($product->price),
+            'stock' => $product->stock,
+            'in_stock' => $product->stock > 0,
+        ];
     }
 }

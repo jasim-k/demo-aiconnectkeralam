@@ -35,27 +35,26 @@ trait InteractsWithStoreCart
     }
 
     /**
-     * A human-readable rendering of the cart, for tool output.
+     * A machine-readable rendering of the cart, for JSON tool output.
+     *
+     * @return array{items: array<int, array<string, mixed>>, count: int, total: int, total_formatted: string, empty: bool}
      */
-    protected function cartSummary(Request $request, CartService $carts): string
+    protected function cartArray(Request $request, CartService $carts): array
     {
         $cart = $carts->present($this->resolveCart($request, $carts));
 
-        if ($cart['items'] === []) {
-            return 'The cart is empty.';
-        }
+        $items = array_map(fn (array $item): array => [
+            ...$item,
+            'unit_price_formatted' => Money::inr($item['unit_price']),
+            'subtotal_formatted' => Money::inr($item['subtotal']),
+        ], $cart['items']);
 
-        $lines = ['Cart contents:'];
-
-        foreach ($cart['items'] as $item) {
-            $variant = trim(implode(' ', array_filter([$item['color'], $item['storage']])));
-            $lines[] = "  • {$item['name']}".($variant !== '' ? " ({$variant})" : '')
-                ." ×{$item['quantity']} — ".Money::inr($item['subtotal']);
-        }
-
-        $lines[] = '';
-        $lines[] = "Items: {$cart['count']}  ·  Grand total: ".Money::inr($cart['total']);
-
-        return implode("\n", $lines);
+        return [
+            'items' => $items,
+            'count' => $cart['count'],
+            'total' => $cart['total'],
+            'total_formatted' => Money::inr($cart['total']),
+            'empty' => $items === [],
+        ];
     }
 }

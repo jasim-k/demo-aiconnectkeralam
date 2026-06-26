@@ -2,10 +2,10 @@
 
 namespace App\Mcp\Tools;
 
+use App\Mcp\Tools\Concerns\FormatsOrders;
 use App\Mcp\Tools\Concerns\InteractsWithStoreCart;
 use App\Services\CartService;
 use App\Services\CheckoutService;
-use App\Support\Money;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\JsonSchema\Types\Type;
 use Illuminate\Validation\ValidationException;
@@ -19,6 +19,7 @@ use Laravel\Mcp\Server\Tool;
 #[Description('Place the order for the current cart. Validates the cart and stock, creates the order, deducts stock and clears the cart. Requires the customer name, email, phone and shipping address.')]
 class CheckoutTool extends Tool
 {
+    use FormatsOrders;
     use InteractsWithStoreCart;
 
     public function handle(Request $request, CheckoutService $checkout, CartService $carts): Response
@@ -43,21 +44,11 @@ class CheckoutTool extends Tool
             return Response::error(implode(' ', $e->validator->errors()->all()));
         }
 
-        $order->load('items');
-
-        $items = $order->items
-            ->map(fn ($item) => "  • {$item->product_name} ×{$item->quantity} — ".Money::inr($item->price * $item->quantity))
-            ->implode("\n");
-
-        return Response::text(
-            "Order confirmed! 🎉\n\n"
-            ."Order number: {$order->order_number}\n"
-            ."Customer: {$order->customer_name} <{$order->email}>\n"
-            ."Ship to: {$order->address}\n\n"
-            ."{$items}\n\n"
-            .'Total: '.Money::inr($order->total)."\n\n"
-            ."You can now call send_telegram_confirmation with order_number \"{$order->order_number}\" to notify the customer."
-        );
+        return Response::json([
+            'confirmed' => true,
+            'order' => $this->orderArray($order),
+            'next_step' => "Call send_telegram_confirmation with order_number \"{$order->order_number}\" to notify the customer.",
+        ]);
     }
 
     /**

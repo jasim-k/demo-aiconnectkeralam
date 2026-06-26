@@ -28,7 +28,7 @@ it('returns product details with variants', function () {
 
     StoreServer::tool(GetProductDetailsTool::class, ['product_id' => $product->id])
         ->assertOk()
-        ->assertSee('Storage options:')
+        ->assertSee('storage_options')
         ->assertSee('512GB');
 });
 
@@ -38,7 +38,7 @@ it('compares products', function () {
 
     StoreServer::tool(CompareProductsTool::class, ['product_ids' => [$a->id, $b->id]])
         ->assertOk()
-        ->assertSee('Most affordable');
+        ->assertSee('most_affordable');
 });
 
 it('adds to the cart and views it', function () {
@@ -46,12 +46,13 @@ it('adds to the cart and views it', function () {
 
     StoreServer::tool(AddToCartTool::class, ['product_id' => $product->id, 'quantity' => 2])
         ->assertOk()
-        ->assertSee('Added Test Phone');
+        ->assertSee('Test Phone')
+        ->assertSee('"added"');
 
     StoreServer::tool(ViewCartTool::class, [])
         ->assertOk()
         ->assertSee('Test Phone')
-        ->assertSee('×2');
+        ->assertSee('"quantity":2');
 });
 
 it('rejects adding more than available stock', function () {
@@ -66,7 +67,7 @@ it('clears the cart', function () {
     StoreServer::tool(AddToCartTool::class, ['product_id' => $product->id])->assertOk();
 
     StoreServer::tool(ClearCartTool::class, [])->assertOk();
-    StoreServer::tool(ViewCartTool::class, [])->assertSee('cart is empty');
+    StoreServer::tool(ViewCartTool::class, [])->assertSee('"empty":true');
 });
 
 it('checks out and deducts stock', function () {
@@ -78,7 +79,7 @@ it('checks out and deducts stock', function () {
         'email' => 'jane@example.com',
         'phone' => '9999999999',
         'address' => 'Kochi, Kerala',
-    ])->assertOk()->assertSee('Order confirmed');
+    ])->assertOk()->assertSee('"confirmed":true');
 
     $order = Order::first();
     expect($order)->not->toBeNull()

@@ -2,8 +2,8 @@
 
 namespace App\Mcp\Tools;
 
+use App\Mcp\Tools\Concerns\FormatsProducts;
 use App\Models\Product;
-use App\Support\Money;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\JsonSchema\Types\Type;
 use Laravel\Mcp\Request;
@@ -16,6 +16,8 @@ use Laravel\Mcp\Server\Tool;
 #[Description('Get full details for a single product by its id, including description, price, stock, and the other storage/colour variants available for the same model.')]
 class GetProductDetailsTool extends Tool
 {
+    use FormatsProducts;
+
     public function handle(Request $request): Response
     {
         $validated = $request->validate([
@@ -25,44 +27,15 @@ class GetProductDetailsTool extends Tool
         $product = Product::findOrFail((int) $validated['product_id']);
         $variants = $product->variants();
 
-        $stock = $product->stock > 0 ? "{$product->stock} in stock" : 'Sold out';
-
-        $lines = [
-            "{$product->name} (#{$product->id})",
-            "Series: {$product->series}",
-            "Model: {$product->model}",
-            'Colour: '.($product->color ?? '—'),
-            'Storage: '.($product->storage ?? '—'),
-            'Price: '.Money::inr($product->price),
-            "SKU: {$product->sku}",
-            "Availability: {$stock}",
-            '',
-            $product->description,
-        ];
-
-        $storageOptions = $variants->whereNotNull('storage')->pluck('storage')->unique()->values();
-        $colorOptions = $variants->whereNotNull('color')->pluck('color')->unique()->values();
-
-        if ($storageOptions->isNotEmpty()) {
-            $lines[] = '';
-            $lines[] = 'Storage options: '.$storageOptions->implode(', ');
-        }
-
-        if ($colorOptions->isNotEmpty()) {
-            $lines[] = 'Colour options: '.$colorOptions->implode(', ');
-        }
-
-        if ($variants->count() > 1) {
-            $lines[] = '';
-            $lines[] = 'Variants (id · storage · colour · price · stock):';
-            foreach ($variants as $variant) {
-                $lines[] = "  #{$variant->id} · ".($variant->storage ?? '—').' · '
-                    .($variant->color ?? '—').' · '.Money::inr($variant->price)
-                    ." · {$variant->stock} in stock";
-            }
-        }
-
-        return Response::text(implode("\n", $lines));
+        return Response::json([
+            'product' => [
+                ...$this->productArray($product),
+                'description' => $product->description,
+            ],
+            'storage_options' => $variants->whereNotNull('storage')->pluck('storage')->unique()->values()->all(),
+            'color_options' => $variants->whereNotNull('color')->pluck('color')->unique()->values()->all(),
+            'variants' => $variants->map(fn ($variant) => $this->productArray($variant))->all(),
+        ]);
     }
 
     /**

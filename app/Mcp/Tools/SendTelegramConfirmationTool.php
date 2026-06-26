@@ -40,10 +40,13 @@ class SendTelegramConfirmationTool extends Tool
         $chatId = $validated['chat_id'] ?? config('services.telegram.chat_id');
 
         if (blank($token) || blank($chatId)) {
-            return Response::text(
-                'Telegram is not configured (set TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID, or pass chat_id). '
-                ."The confirmation message that would be sent is:\n\n".$message
-            );
+            return Response::json([
+                'sent' => false,
+                'configured' => false,
+                'order_number' => $order->order_number,
+                'message' => 'Telegram is not configured (set TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID, or pass chat_id).',
+                'preview' => $message,
+            ]);
         }
 
         try {
@@ -59,7 +62,11 @@ class SendTelegramConfirmationTool extends Tool
             return Response::error('Telegram API error: '.($response->json('description') ?? $response->status()));
         }
 
-        return Response::text("✅ Telegram confirmation sent for order {$order->order_number}.");
+        return Response::json([
+            'sent' => true,
+            'configured' => true,
+            'order_number' => $order->order_number,
+        ]);
     }
 
     private function buildMessage(Order $order): string

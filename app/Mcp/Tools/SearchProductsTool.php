@@ -27,15 +27,11 @@ class SearchProductsTool extends Tool
 
         $results = $products->search($validated['query'], $validated['limit'] ?? 20);
 
-        if ($results->isEmpty()) {
-            return Response::text("No products found matching \"{$validated['query']}\".");
-        }
-
-        $lines = $results->map(fn ($product) => $this->productLine($product))->implode("\n");
-
-        return Response::text(
-            "Found {$results->count()} product(s) for \"{$validated['query']}\":\n\n{$lines}"
-        );
+        return Response::json([
+            'query' => $validated['query'],
+            'count' => $results->count(),
+            'products' => $results->map(fn ($product) => $this->productArray($product))->all(),
+        ]);
     }
 
     /**

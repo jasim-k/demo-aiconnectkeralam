@@ -22,7 +22,10 @@ class ClearCartTool extends Tool
     {
         $carts->clear($this->resolveCart($request, $carts));
 
-        return Response::text('The cart has been cleared. It is now empty.');
+        return Response::json([
+            'cleared' => true,
+            'cart' => $this->cartArray($request, $carts),
+        ]);
     }
 
     /**

@@ -29,9 +29,13 @@ class RemoveFromCartTool extends Tool
 
         $carts->remove($this->resolveCart($request, $carts), $product);
 
-        return Response::text(
-            "Removed {$product->name} from the cart.\n\n".$this->cartSummary($request, $carts)
-        );
+        return Response::json([
+            'removed' => [
+                'product_id' => $product->id,
+                'name' => $product->name,
+            ],
+            'cart' => $this->cartArray($request, $carts),
+        ]);
     }
 
     /**

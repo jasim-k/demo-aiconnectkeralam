@@ -60,5 +60,5 @@ it('keeps each customer cart isolated', function () {
 
     StoreServer::actingAs($bob)->tool(ViewCartTool::class, [])
         ->assertOk()
-        ->assertSee('cart is empty');
+        ->assertSee('"empty":true');
 });

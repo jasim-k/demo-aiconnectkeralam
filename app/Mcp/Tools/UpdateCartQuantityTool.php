@@ -35,9 +35,14 @@ class UpdateCartQuantityTool extends Tool
             return Response::error(implode(' ', $e->validator->errors()->all()));
         }
 
-        return Response::text(
-            "Updated {$product->name} to quantity {$validated['quantity']}.\n\n".$this->cartSummary($request, $carts)
-        );
+        return Response::json([
+            'updated' => [
+                'product_id' => $product->id,
+                'name' => $product->name,
+                'quantity' => $validated['quantity'],
+            ],
+            'cart' => $this->cartArray($request, $carts),
+        ]);
     }
 
     /**
