@@ -1,87 +1,120 @@
-# AI Connect Apple Store — Phase 1 (Storefront)
+# AI Connect Apple Store — Phase 2 (MCP)
 
-An AI-Powered Apple Store demo for **AI Connect Kerala**, built to show how a clean,
-conventional Laravel application is structured before being AI-enabled.
+The **AI-enabled** version of the AI Connect Apple Store demo. It contains the full
+Phase 1 storefront **plus** a [Laravel MCP](https://github.com/laravel/mcp) server that
+exposes the store's capabilities as tools an AI assistant (e.g. Claude Desktop) can call
+with natural language.
 
-This repository is **Phase 1**: a complete, AI-free e-commerce storefront. The
-**Phase 2** companion (`../cart-mcp`) exposes this same business logic to an AI
-assistant over the Model Context Protocol (MCP).
+Crucially, **no business logic was changed** to add AI — the MCP tools are thin wrappers
+around the existing `ProductService`, `CartService`, `CheckoutService` and `OrderService`.
 
-## Tech stack
+> For the storefront itself (catalog, cart, checkout, service-layer architecture, setup,
+> branding), see the Phase 1 README in `../cart`. This README focuses on the MCP layer.
 
-- **Backend:** Laravel 13, PHP 8.3+, SQLite (MySQL-ready)
-- **Frontend:** React 19 + TypeScript, Inertia.js v3, Tailwind CSS v4
-- **Auth:** Laravel Fortify (login, registration, profile, 2FA scaffolding)
-- **Tooling:** Pest, Larastan (level 7), Pint, ESLint, Prettier, Wayfinder
+## MCP tools
 
-## Features
+Defined in `app/Mcp/Tools/`, registered by `app/Mcp/Servers/StoreServer.php`:
 
-- **Home** — hero, featured products, latest arrivals, "shop by series" tiles
-- **Catalog** — full-text search, filters (series / storage / colour), sorting, pagination
-- **Product detail** — gallery, variant switching (storage & colour), stock status, quantity selector
-- **Cart** — session-based; add / update / remove / clear, live grand total, navbar badge
-- **Checkout** — **requires login**; validates cart & stock, creates the order, deducts stock, clears the cart (atomic transaction)
-- **Order success** — order number, summary, session-guarded
+| Category | Tools |
+|---|---|
+| **Product** | `search_products`, `get_product_details`, `compare_products` |
+| **Cart** | `add_to_cart`, `update_cart_quantity`, `remove_from_cart`, `clear_cart`, `view_cart` |
+| **Checkout** | `checkout`, `get_order_details` |
+| **Notification** | `send_telegram_confirmation` |
 
-The catalog seeds **61 real Apple products** (iPhone 15 / 16 / 17 lines + accessories)
-with genuine product imagery and INR pricing.
+The cart is shared across tool calls via a stable session id (`MCP_CART_SESSION`, default
+`mcp-assistant`). Prices are formatted in INR (₹).
 
-## Architecture
+**Example flow:** *"Add an iPhone 17 Pro 256GB and two MagSafe chargers, then check out."*
+→ `search_products` → `add_to_cart` → `view_cart` → `checkout` → `send_telegram_confirmation`.
 
-Business logic lives in a **service layer**; controllers stay thin.
-
-```
-app/
-├── Models/         Product, Cart, CartItem, Order, OrderItem
-├── Services/       ProductService, CartService, CheckoutService, OrderService
-└── Http/
-    ├── Controllers/  Home, Product, Cart, Checkout
-    └── Requests/      AddToCart, UpdateCart, Checkout
-resources/js/
-├── pages/store/    home, products, product, cart, checkout, order-success
-├── layouts/        store-layout (storefront), auth-layout, settings
-└── components/store/  product-card, product-image
-```
-
-## Getting started
+## Setup
 
 ```bash
-# One-shot setup (install, env, key, migrate, build)
 composer setup
-
-# Seed the Apple catalog
-php artisan migrate:fresh --seed
-
-# Run everything (server + Vite + queue + logs)
-composer dev
+php artisan migrate:fresh --seed     # 61 Apple products
+php artisan passport:keys            # OAuth signing keys (web server, see below)
 ```
 
-Then visit the URL printed by `php artisan serve` (default `http://localhost:8000`).
+## Running the MCP server
 
-> SQLite is used by default (`database/database.sqlite`). To use MySQL, set the
-> `DB_*` values in `.env` and re-run `php artisan migrate:fresh --seed`.
+The server is registered twice in `routes/ai.php`:
 
-## Testing & quality
+### Local (stdio) — for Claude Desktop
 
 ```bash
-php artisan test          # Pest feature tests
-composer lint             # Pint (format)
-composer types:check      # Larastan (PHP static analysis)
-npm run types:check       # TypeScript
-npm run lint              # ESLint
+php artisan mcp:start store
 ```
 
-## Branding & theme
+Add to your `claude_desktop_config.json`:
 
-The store is themed for **AI Connect Kerala** — brand blue (`#1877f2`), the AI Connect
-logo, and a light-only theme. The storefront is intentionally Apple-inspired (clean,
-rounded, generous whitespace).
+```json
+{
+  "mcpServers": {
+    "ai-connect-store": {
+      "command": "php",
+      "args": ["artisan", "mcp:start", "store"],
+      "cwd": "/absolute/path/to/cart-mcp"
+    }
+  }
+}
+```
 
-## Phase 2 — AI enablement
+The local server is a trusted subprocess and is **not** behind OAuth.
 
-See **`../cart-mcp`** for the MCP server that exposes search, cart, checkout, and order
-tools to an AI assistant (e.g. Claude Desktop) — without modifying any of the business
-logic in this project.
+### Web (HTTP) — for remote clients, protected by OAuth 2.1
+
+```
+POST /mcp/store        # protected by auth:api (Passport)
+```
+
+Unauthenticated requests receive `401` with a `WWW-Authenticate` header pointing at the
+OAuth discovery document, so MCP clients can complete the flow automatically:
+
+- Discovery: `/.well-known/oauth-authorization-server`, `/.well-known/oauth-protected-resource`
+- Dynamic client registration: `POST /oauth/register`
+- Authorize / token: `/oauth/authorize`, `/oauth/token`
+
+OAuth is provided by **Laravel Passport** as a translation layer to the underlying user
+(single `mcp:use` scope). Configure it via:
+
+- `config/auth.php` — the `api` guard (`driver: passport`)
+- `App\Models\User` — `HasApiTokens` + `OAuthenticatable`
+- `AppServiceProvider` — `Passport::authorizationView('mcp.authorize')`
+
+### Inspect / debug
+
+```bash
+php artisan mcp:inspector store        # local server
+php artisan mcp:inspector store-web    # web server (supply a bearer token)
+```
+
+## Telegram notifications
+
+`send_telegram_confirmation` sends an order summary via the Telegram Bot API. Set the
+credentials in `.env`:
+
+```env
+TELEGRAM_BOT_TOKEN=
+TELEGRAM_CHAT_ID=
+```
+
+If they are unset, the tool returns the message it *would* send (so the demo still flows).
+
+## Testing
+
+```bash
+php artisan test                         # full suite
+php artisan test tests/Feature/Mcp       # MCP tool + OAuth tests
+```
+
+MCP tools are tested with the built-in harness, e.g.:
+
+```php
+StoreServer::tool(SearchProductsTool::class, ['query' => 'iPhone 17'])
+    ->assertOk()
+    ->assertSee('iPhone 17 Pro');
+```
 
 ---
 
