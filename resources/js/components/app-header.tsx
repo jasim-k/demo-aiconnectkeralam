@@ -49,8 +49,8 @@ const mainNavItems: NavItem[] = [
 
 const rightNavItems: NavItem[] = [
     {
-        title: 'Repository',
-        href: 'https://github.com/laravel/react-starter-kit',
+        title: 'AI Connect Kerala',
+        href: 'https://demo.aiconnectkeralam.in',
         icon: Folder,
     },
     {

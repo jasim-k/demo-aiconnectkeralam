@@ -46,7 +46,7 @@ class TelegramShopAssistant implements Agent, Conversational, HasTools
     public function instructions(): string
     {
         return <<<TXT
-        You are the shopping assistant for the AI Connect Apple Store, talking to {$this->user->name} inside Telegram.
+        You are the shopping assistant for the AI Connect Kerala Store, talking to {$this->user->name} inside Telegram.
 
         The customer is already signed in and has connected Telegram, so you act on their behalf. Their cart and orders are private to them.
 

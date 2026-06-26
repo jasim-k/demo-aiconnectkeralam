@@ -62,7 +62,7 @@ class TelegramWebhookController extends Controller
         $user = User::where('telegram_chat_id', $chatId)->first();
 
         if ($user === null) {
-            return "👋 Welcome to the iPhone Store bot.\n\n"
+            return "👋 Welcome to the AI Connect Kerala Store bot.\n\n"
                 .'To start shopping, connect your account: generate a pairing code from '
                 .'Settings → Telegram and send it here as: /pair YOURCODE';
         }
@@ -86,7 +86,7 @@ class TelegramWebhookController extends Controller
     private function handlePairing(?string $code, string $chatId, ?string $username): string
     {
         if ($code === null || $code === '') {
-            return "👋 Welcome to the iPhone Store bot.\n\n"
+            return "👋 Welcome to the AI Connect Kerala Store bot.\n\n"
                 .'To connect your account, generate a pairing code from Settings → Telegram '
                 .'and send it here as: /pair YOURCODE';
         }
@@ -98,7 +98,7 @@ class TelegramWebhookController extends Controller
                 .'Generate a fresh code from Settings → Telegram and try again.';
         }
 
-        return "✅ Connected! Your Telegram is now linked to {$user->name}'s iPhone Store account. "
+        return "✅ Connected! Your Telegram is now linked to {$user->name}'s AI Connect Kerala Store account. "
             .'Order confirmations will arrive here.';
     }
 

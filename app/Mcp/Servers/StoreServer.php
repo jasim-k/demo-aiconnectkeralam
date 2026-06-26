@@ -18,10 +18,10 @@ use Laravel\Mcp\Server\Attributes\Instructions;
 use Laravel\Mcp\Server\Attributes\Name;
 use Laravel\Mcp\Server\Attributes\Version;
 
-#[Name('AI Connect Apple Store')]
+#[Name('AI Connect Kerala Store')]
 #[Version('1.0.0')]
 #[Instructions(<<<'TXT'
-This server lets you shop the AI Connect Apple Store on the customer's behalf.
+This server lets you shop the AI Connect Kerala Store on the customer's behalf.
 
 Typical flow:
 1. search_products to find an item, then get_product_details to confirm the exact variant id.

@@ -21,6 +21,6 @@ class TelegramOrderMessage
             ."Order {$order->order_number}\n\n"
             ."Items:\n{$items}\n\n"
             .'Total: '.Money::inr($order->total)."\n\n"
-            .'Thank you for shopping with iPhone Store.';
+            .'Thank you for shopping with AI Connect Kerala Store.';
     }
 }
