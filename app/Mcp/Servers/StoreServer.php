@@ -29,6 +29,15 @@ Typical flow:
 3. checkout with the customer's name, email, phone and shipping address to place the order.
 4. send_telegram_confirmation with the returned order_number to notify the customer.
 
+Presenting choices:
+- When a tool returns more than one but fewer than ten products (use the `count`
+  field, or the `variants` of get_product_details), present them to the customer
+  as a single-choice selection: a short numbered list, one product per line, and
+  ask them to pick exactly one before continuing (e.g. before adding to the cart
+  or showing details). Do not pick on the customer's behalf.
+- If ten or more products match, do not list them all — summarise and ask the
+  customer to narrow their search instead.
+
 Prices are in Indian Rupees (₹). There is a single shared cart for this assistant.
 TXT)]
 class StoreServer extends Server

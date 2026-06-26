@@ -13,7 +13,7 @@ use Laravel\Mcp\Server\Attributes\Name;
 use Laravel\Mcp\Server\Tool;
 
 #[Name('search_products')]
-#[Description('Search the Apple store catalog by name, model, series, colour or SKU. Returns matching products with their id, price and stock so you can fetch details or add them to the cart.')]
+#[Description('Search the Apple store catalog by name, model, series, colour or SKU. Returns matching products with their id, price and stock so you can fetch details or add them to the cart. If fewer than ten products match (see the count field), present them to the customer as a single-choice numbered selection and let them pick exactly one before continuing.')]
 class SearchProductsTool extends Tool
 {
     use FormatsProducts;

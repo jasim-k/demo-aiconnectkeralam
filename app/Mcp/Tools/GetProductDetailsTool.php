@@ -13,7 +13,7 @@ use Laravel\Mcp\Server\Attributes\Name;
 use Laravel\Mcp\Server\Tool;
 
 #[Name('get_product_details')]
-#[Description('Get full details for a single product by its id, including description, price, stock, and the other storage/colour variants available for the same model.')]
+#[Description('Get full details for a single product by its id, including description, price, stock, and the other storage/colour variants available for the same model. When several variants are returned, present them to the customer as a single-choice selection so they pick exactly one.')]
 class GetProductDetailsTool extends Tool
 {
     use FormatsProducts;

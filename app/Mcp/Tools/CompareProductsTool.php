@@ -13,7 +13,7 @@ use Laravel\Mcp\Server\Attributes\Name;
 use Laravel\Mcp\Server\Tool;
 
 #[Name('compare_products')]
-#[Description('Compare 2 to 4 products side by side by their id, showing series, price, storage, colour and stock to help a customer choose.')]
+#[Description('Compare 2 to 4 products side by side by their id, showing series, price, storage, colour and stock to help a customer choose. Present the compared products as a single-choice selection so the customer picks exactly one.')]
 class CompareProductsTool extends Tool
 {
     use FormatsProducts;
