@@ -4,6 +4,7 @@ use App\Mcp\Servers\StoreServer;
 use App\Mcp\Tools\AddToCartTool;
 use App\Mcp\Tools\CheckoutTool;
 use App\Mcp\Tools\GetOrderDetailsTool;
+use App\Mcp\Tools\ListOrdersTool;
 use App\Mcp\Tools\SendTelegramConfirmationTool;
 use App\Mcp\Tools\ViewCartTool;
 use App\Models\Order;
@@ -34,6 +35,31 @@ it('lets a customer read only their own order', function () {
     StoreServer::actingAs($owner)->tool(GetOrderDetailsTool::class, ['order_number' => $order->order_number])
         ->assertOk()
         ->assertSee('APL-OWNED-0001');
+});
+
+it('lists the customer their own orders via list_orders', function () {
+    $owner = User::factory()->create();
+    Order::factory()->for($owner)->create(['order_number' => 'APL-OLD-0001', 'created_at' => now()->subDay()]);
+    Order::factory()->for($owner)->create(['order_number' => 'APL-NEW-0001', 'created_at' => now()]);
+
+    StoreServer::actingAs($owner)->tool(ListOrdersTool::class, [])
+        ->assertOk()
+        ->assertSee('"count":2')
+        ->assertSee('APL-NEW-0001')
+        ->assertSee('APL-OLD-0001');
+});
+
+it('does not list another customer orders via list_orders', function () {
+    $owner = User::factory()->create();
+    Order::factory()->for($owner)->create(['order_number' => 'APL-MINE-0001']);
+
+    $stranger = User::factory()->create();
+    Order::factory()->for($stranger)->create(['order_number' => 'APL-THEIRS-0001']);
+
+    StoreServer::actingAs($owner)->tool(ListOrdersTool::class, [])
+        ->assertOk()
+        ->assertSee('"count":1')
+        ->assertSee('APL-MINE-0001');
 });
 
 it('hides another customer order via get_order_details', function () {

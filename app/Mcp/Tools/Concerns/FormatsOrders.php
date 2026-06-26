@@ -40,4 +40,24 @@ trait FormatsOrders
             'total_formatted' => Money::inr($order->total),
         ];
     }
+
+    /**
+     * A compact summary of an order for list output. Use orderArray when the
+     * caller needs the full line items and shipping details.
+     *
+     * @return array<string, mixed>
+     */
+    protected function orderSummaryArray(Order $order): array
+    {
+        $order->loadMissing('items');
+
+        return [
+            'order_number' => $order->order_number,
+            'status' => $order->status,
+            'placed_at' => $order->created_at?->toIso8601String(),
+            'item_count' => (int) $order->items->sum('quantity'),
+            'total' => $order->total,
+            'total_formatted' => Money::inr($order->total),
+        ];
+    }
 }
