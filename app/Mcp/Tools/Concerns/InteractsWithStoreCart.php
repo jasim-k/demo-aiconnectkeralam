@@ -19,11 +19,10 @@ trait InteractsWithStoreCart
      */
     protected function cartSession(Request $request): string
     {
-        $base = (string) config('store.mcp_cart_session', 'mcp-assistant');
-
-        $user = $request->user();
-
-        return $user !== null ? "{$base}-user-{$user->getAuthIdentifier()}" : $base;
+        return app(CartService::class)->sessionKeyFor(
+            $request->user(),
+            (string) config('store.mcp_cart_session', 'mcp-assistant'),
+        );
     }
 
     /**

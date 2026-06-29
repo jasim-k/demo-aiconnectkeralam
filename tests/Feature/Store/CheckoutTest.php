@@ -34,6 +34,24 @@ it('shows the checkout page with the cart and prefilled customer', function () {
         );
 });
 
+it('prefills the saved profile phone and address at checkout', function () {
+    $user = User::factory()->create([
+        'phone' => '9999999999',
+        'address' => 'Kochi, Kerala',
+    ]);
+    $this->actingAs($user);
+
+    $product = Product::factory()->create(['stock' => 10]);
+    $this->post('/cart/add', ['product_id' => $product->id, 'quantity' => 1]);
+
+    $this->get('/checkout')
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->where('customer.phone', '9999999999')
+            ->where('customer.address', 'Kochi, Kerala')
+        );
+});
+
 it('validates the checkout form', function () {
     $this->actingAs(User::factory()->create());
 

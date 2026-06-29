@@ -26,7 +26,7 @@ export default function Profile() {
                 <Heading
                     variant="small"
                     title="Profile"
-                    description="Update your name and email address"
+                    description="Update your name, email and contact details used at checkout"
                 />
 
                 <Form
@@ -74,6 +74,44 @@ export default function Profile() {
                                 <InputError
                                     className="mt-2"
                                     message={errors.email}
+                                />
+                            </div>
+
+                            <div className="grid gap-2">
+                                <Label htmlFor="phone">Phone number</Label>
+
+                                <Input
+                                    id="phone"
+                                    type="tel"
+                                    className="mt-1 block w-full"
+                                    defaultValue={auth.user.phone ?? ''}
+                                    name="phone"
+                                    autoComplete="tel"
+                                    placeholder="Phone number for delivery contact"
+                                />
+
+                                <InputError
+                                    className="mt-2"
+                                    message={errors.phone}
+                                />
+                            </div>
+
+                            <div className="grid gap-2">
+                                <Label htmlFor="address">Shipping address</Label>
+
+                                <textarea
+                                    id="address"
+                                    className="mt-1 flex min-h-20 w-full rounded-xl border border-input bg-transparent px-3 py-2 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                                    defaultValue={auth.user.address ?? ''}
+                                    name="address"
+                                    rows={3}
+                                    autoComplete="street-address"
+                                    placeholder="Full delivery address"
+                                />
+
+                                <InputError
+                                    className="mt-2"
+                                    message={errors.address}
                                 />
                             </div>
 

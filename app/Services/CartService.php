@@ -5,10 +5,30 @@ namespace App\Services;
 use App\Models\Cart;
 use App\Models\CartItem;
 use App\Models\Product;
+use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Validation\ValidationException;
 
 class CartService
 {
+    /**
+     * Resolve the cart session key for a visitor.
+     *
+     * Authenticated customers share a single cart across every channel (web
+     * storefront, MCP server and the Telegram assistant) via a user-namespaced
+     * key, so items added in one place appear everywhere. Guests fall back to
+     * their browser session id.
+     */
+    public function sessionKeyFor(?Authenticatable $user, string $guestSessionId): string
+    {
+        if ($user !== null) {
+            $base = (string) config('store.mcp_cart_session', 'mcp-assistant');
+
+            return "{$base}-user-{$user->getAuthIdentifier()}";
+        }
+
+        return $guestSessionId;
+    }
+
     /**
      * Resolve (or create) the cart for the given session identifier.
      */

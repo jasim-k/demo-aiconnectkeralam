@@ -45,7 +45,9 @@ class HandleInertiaRequests extends Middleware
                 'user' => $request->user(),
             ],
             'cart' => fn (): array => $this->cart->summary(
-                $this->cart->existingForSession($request->session()->getId()),
+                $this->cart->existingForSession(
+                    $this->cart->sessionKeyFor($request->user(), $request->session()->getId()),
+                ),
             ),
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
         ];

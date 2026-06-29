@@ -7,7 +7,7 @@ import AuthLayout from '@/layouts/auth-layout';
 import SettingsLayout from '@/layouts/settings/layout';
 import StoreLayout from '@/layouts/store-layout';
 
-const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
+const appName = import.meta.env.VITE_APP_NAME || 'AI Connect Kerala';
 
 createInertiaApp({
     title: (title) => (title ? `${title} - ${appName}` : appName),

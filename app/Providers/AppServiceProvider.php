@@ -41,14 +41,8 @@ class AppServiceProvider extends ServiceProvider
             app()->isProduction(),
         );
 
-        Password::defaults(fn (): ?Password => app()->isProduction()
-            ? Password::min(12)
-                ->mixedCase()
-                ->letters()
-                ->numbers()
-                ->symbols()
-                ->uncompromised()
-            : null,
-        );
+        // Use a simple password baseline in every environment; this demo
+        // intentionally does not enforce a stricter production password policy.
+        Password::defaults(fn (): Password => Password::min(5));
     }
 }
