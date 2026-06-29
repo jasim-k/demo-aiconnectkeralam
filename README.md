@@ -19,7 +19,8 @@ Defined in `app/Mcp/Tools/`, registered by `app/Mcp/Servers/StoreServer.php`:
 |---|---|
 | **Product** | `search_products`, `get_product_details`, `compare_products` |
 | **Cart** | `add_to_cart`, `update_cart_quantity`, `remove_from_cart`, `clear_cart`, `view_cart` |
-| **Checkout** | `checkout`, `get_order_details` |
+| **Checkout** | `checkout` |
+| **Orders** | `list_orders`, `get_order_details` |
 | **Notification** | `send_telegram_confirmation` |
 
 The cart is shared across tool calls via a stable session id (`MCP_CART_SESSION`, default
@@ -27,6 +28,9 @@ The cart is shared across tool calls via a stable session id (`MCP_CART_SESSION`
 
 **Example flow:** *"Add an iPhone 17 Pro 256GB and two MagSafe chargers, then check out."*
 → `search_products` → `add_to_cart` → `view_cart` → `checkout` → `send_telegram_confirmation`.
+
+`list_orders` / `get_order_details` let the assistant surface a customer's own order
+history (including orders placed on the website) without asking them to recall an order number.
 
 ## Setup
 
